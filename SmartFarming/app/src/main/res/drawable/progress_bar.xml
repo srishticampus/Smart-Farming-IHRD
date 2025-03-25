@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?><!-- res/drawable/progress_bar.xml -->
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Background (track) -->
+    <item android:id="@android:id/background">
+        <shape>
+            <corners android:radius="10dp" />
+            <solid android:color="#D3D3D3" />  <!-- Track color -->
+        </shape>
+    </item>
+    <!-- Progress (filled portion) -->
+    <item android:id="@android:id/progress">
+        <clip>
+            <shape>
+                <corners android:radius="10dp" />
+                <solid android:color="#ffffff" />  <!-- Progress color -->
+            </shape>
+        </clip>
+    </item>
+</layer-list>
