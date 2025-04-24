@@ -106,6 +106,4 @@ class PlantRecommendationActivity : AppCompatActivity() {
             }
         })
     }
-
-
 }

@@ -93,7 +93,6 @@ class DashBoardActivity : AppCompatActivity() {
                 }
             })
     }
-
     private fun initializeDatabaseListener() {
         database = FirebaseDatabase.getInstance().reference
         database.addValueEventListener(object : ValueEventListener {
@@ -102,7 +101,8 @@ class DashBoardActivity : AppCompatActivity() {
                     val phValue =
                         snapshot.child("SensorData/pH").value.toString().toFloatOrNull() ?: 7f
                     val tankLevelRaw =
-                        snapshot.child("SensorData/WaterLevel").value.toString().toFloatOrNull() ?: 0f
+                        snapshot.child("SensorData/WaterLevel").value.toString().toFloatOrNull()
+                            ?: 0f
                     val humidity = snapshot.child("SensorData/Humidity").value.toString()
                     val lightRaw =
                         snapshot.child("SensorData/Light").value.toString().toFloatOrNull() ?: 0f
@@ -117,8 +117,8 @@ class DashBoardActivity : AppCompatActivity() {
                     binding.tempValue.text = "$temperature°C"
                     binding.perceantgeOfLight.text = "$lightPercentage%"
                     binding.moisturePercentage.text = "$soilMoisturePercentage%"
-                    binding.phValueText.text = "${phValue}ph"
-                    binding.tankPercentage.text = "$tankLevelRaw%"
+                    binding.phValueText.text = String.format("%.1f ph", phValue)
+                    binding.tankPercentage.text = String.format("%d%%", tankLevelRaw.toInt())
                     binding.tankProgressBar.progress = tankLevelRaw.toInt()
                     binding.phProgressBar.progress = phProgress
                     binding.progressBar.progress = lightPercentage
