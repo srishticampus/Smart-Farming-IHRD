@@ -30,7 +30,6 @@ class LoginActivity : AppCompatActivity(), View.OnClickListener {
         enableEdgeToEdge()
         binding = ActivityLoginBinding.inflate(layoutInflater)
         sharedPreference = SharedPreferencesManager(applicationContext)
-
         setContentView(binding.root)
 
         binding.hidePassword.setOnClickListener(this)
@@ -51,8 +50,6 @@ class LoginActivity : AppCompatActivity(), View.OnClickListener {
 
             val phone = binding.userName.text.toString().trim()
             val password = binding.loginPassword.text.toString().trim()
-
-
             if (checkAllFields()) {
                 val params = HashMap<String?, String>()
                 params["phone"] = phone
@@ -103,7 +100,6 @@ class LoginActivity : AppCompatActivity(), View.OnClickListener {
                 Toast.makeText(applicationContext, "Enter the details", Toast.LENGTH_SHORT).show()
             }
         }
-
         binding.signupTextBtn.setOnClickListener {
             val intent = Intent(applicationContext, SignupActivity::class.java)
             startActivity(intent)
@@ -112,28 +108,39 @@ class LoginActivity : AppCompatActivity(), View.OnClickListener {
 
     private fun checkAllFields(): Boolean {
         var isValid = true
-        if (binding.userName.length() == 0) {
+        val userName = binding.userName.text.toString().trim()
+        val password = binding.loginPassword.text.toString()
+
+        // Username validation
+        if (userName.isEmpty()) {
             binding.userName.error = "Number is required"
             isValid = false
         }
-        if (binding.loginPassword.length() == 0) {
+
+        // Password validation
+        if (password.isEmpty()) {
             binding.loginPassword.error = "Password is required"
             isValid = false
-        } else if (binding.loginPassword.length() < 4) {
+        } else if (password.length < 4) {
             binding.loginPassword.error = "Password must be at least 4 characters"
             isValid = false
+        } else if (password != password.trim()) {
+            binding.loginPassword.error = "Password should not contain spaces at start or end"
+            isValid = false
         }
+
         return isValid
     }
-
     override fun onClick(v: View?) {
         if (v?.id == R.id.hidePassword) {
-            if (binding.loginPassword.transformationMethod == PasswordTransformationMethod.getInstance()) {
-                binding.hidePassword.setImageResource(R.drawable.ic_password_eye)
+            if (binding.loginPassword.transformationMethod
+                    .equals(PasswordTransformationMethod.getInstance())
+            ) {
+                binding.hidePassword.setImageResource(R.drawable.ic_hide_eyes)
                 binding.loginPassword.transformationMethod =
                     HideReturnsTransformationMethod.getInstance()
             } else {
-                binding.hidePassword.setImageResource(R.drawable.ic_hide_eyes)
+                binding.hidePassword.setImageResource(R.drawable.ic_password_eye)
                 binding.loginPassword.transformationMethod =
                     PasswordTransformationMethod.getInstance()
             }

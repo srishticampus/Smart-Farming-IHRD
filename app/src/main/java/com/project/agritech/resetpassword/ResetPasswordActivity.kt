@@ -34,12 +34,9 @@ class ResetPasswordActivity : AppCompatActivity(), View.OnClickListener {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
         }
-
         sharedPreferencesManager = SharedPreferencesManager(applicationContext)
-
         val userId: String = sharedPreferencesManager.getUserId()
         changePassword(userId)
-
         binding.hideCurrentPassword.setOnClickListener(this)
         binding.hideNewPassword.setOnClickListener(this)
 
@@ -56,7 +53,6 @@ class ResetPasswordActivity : AppCompatActivity(), View.OnClickListener {
             if (checkAllFields()) {
                 lifecycleScope.launch(Dispatchers.IO) {
                     val response = ApiUtilities.getInstance().resetPassword(params)
-
                     withContext(Dispatchers.Main) {
                         if (response.isSuccessful) {
                             val result = response.body()
@@ -92,23 +88,18 @@ class ResetPasswordActivity : AppCompatActivity(), View.OnClickListener {
 
     private fun checkAllFields(): Boolean {
         var isValid = true
-
         // Reset errors
         binding.currentPassword.error = null
         binding.newPassword.error = null
-
-        val currentPassword = binding.currentPassword.text.toString().trim()
-        val newPassword = binding.newPassword.text.toString().trim()
-
+        val currentPassword = binding.currentPassword.text.toString()
+        val newPassword = binding.newPassword.text.toString()
         // Current Password Validation
-        if (currentPassword.isEmpty()) {
+        if (currentPassword.trim().isEmpty()) {
             binding.currentPassword.error = "Current Password is required"
             isValid = false
         }
-
         // New Password Validation
-        val passwordPattern = "^(?=.*[A-Z])(?=.*[0-9])(?=.*[@#\$%^&+=!]).{6,8}$"
-
+        val passwordPattern = "^(?=.*[A-Z])(?=.*[0-9])(?=.*[@#\$%^&+=!])(?!.*\\s).{6,8}$"
         if (newPassword.isEmpty()) {
             binding.newPassword.error = "New Password is required"
             isValid = false
@@ -117,18 +108,14 @@ class ResetPasswordActivity : AppCompatActivity(), View.OnClickListener {
             isValid = false
         } else if (!newPassword.matches(passwordPattern.toRegex())) {
             binding.newPassword.error =
-                "Password must contain at least one uppercase letter, one special character, and one number"
+                "Include 1 uppercase letter, 1 special character, 1 number, and no spaces"
             isValid = false
         } else if (newPassword == currentPassword) {
             binding.newPassword.error = "New password cannot be the same as the current password"
             isValid = false
         }
 
-        if (!isValid) {
-            return false
-        }
-
-        return true
+        return isValid
     }
 
     private fun showHidePassWord(v: View?) {
@@ -161,7 +148,6 @@ class ResetPasswordActivity : AppCompatActivity(), View.OnClickListener {
                     PasswordTransformationMethod.getInstance()
             }
         }
-
     }
 
     override fun onClick(v: View?) {

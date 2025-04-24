@@ -3,6 +3,7 @@ package com.project.agritech.plantrecommandation.view
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
+import android.view.View
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
@@ -63,24 +64,33 @@ class PlantRecommendationActivity : AppCompatActivity() {
     }
 
     private fun fetchPlantData() {
-        //binding.progressBar.visibility = View.VISIBLE // Show loading indicator
-
         ApiUtilities.getInstance().getPlantSuggestions().enqueue(object : Callback<PlantResponse> {
             override fun onResponse(call: Call<PlantResponse>, response: Response<PlantResponse>) {
-
                 if (response.isSuccessful && response.body() != null) {
-                    val plants = response.body()?.data ?: emptyList()
-                    plantList.clear()
-                    plantList.addAll(plants.map {
-                        Plant(it.title, it.image, it.description)
-                    })
-                    adapter.notifyDataSetChanged() // Refresh RecyclerView
+                    val plantResponse = response.body()!!
+
+                    if (plantResponse.status && plantResponse.data.isNotEmpty()) {
+                        plantList.clear()
+                        plantList.addAll(plantResponse.data.map {
+                            Plant(it.title, it.image, it.description)
+                        })
+                        adapter.notifyDataSetChanged()
+
+                        binding.noDataText.visibility = View.GONE
+                        binding.recyclerView.visibility = View.VISIBLE
+                    } else {
+                        // Show "No matching plants found"
+                        binding.noDataText.visibility = View.VISIBLE
+                        binding.recyclerView.visibility = View.GONE
+                    }
                 } else {
                     Toast.makeText(
                         this@PlantRecommendationActivity,
                         "Failed to fetch plants",
                         Toast.LENGTH_SHORT
                     ).show()
+                    binding.noDataText.visibility = View.VISIBLE
+                    binding.recyclerView.visibility = View.GONE
                 }
             }
 
@@ -90,8 +100,12 @@ class PlantRecommendationActivity : AppCompatActivity() {
                     "API Error: ${t.message}",
                     Toast.LENGTH_SHORT
                 ).show()
+                binding.noDataText.visibility = View.VISIBLE
+                binding.recyclerView.visibility = View.GONE
                 Log.e("PlantAPI", "Error: ${t.message}")
             }
         })
     }
+
+
 }

@@ -54,13 +54,9 @@ class DashBoardActivity : AppCompatActivity() {
         }
         val viewPlantsButton: Button = findViewById(R.id.viewPlantsButton)
         viewPlantsButton.setOnClickListener {
-//            val intent = Intent(this, PlantRecommendationActivity::class.java)
-//            startActivity(intent)
             fetchPlantSuggestions()
         }
-
         initializeDatabaseListener()
-
     }
 
     private fun fetchPlantSuggestions() {
@@ -72,7 +68,6 @@ class DashBoardActivity : AppCompatActivity() {
                 ) {
                     if (response.isSuccessful && response.body() != null) {
                         val plantList = response.body()?.data ?: emptyList()
-
                         // Only send image & title
                         val intent =
                             Intent(this@DashBoardActivity, PlantRecommendationActivity::class.java)
@@ -99,25 +94,23 @@ class DashBoardActivity : AppCompatActivity() {
             })
     }
 
-
     private fun initializeDatabaseListener() {
         database = FirebaseDatabase.getInstance().reference
-
         database.addValueEventListener(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
                 try {
                     val phValue =
-                        snapshot.child("Sensor/phLevel").value.toString().toFloatOrNull() ?: 7f
+                        snapshot.child("SensorData/pH").value.toString().toFloatOrNull() ?: 7f
                     val tankLevelRaw =
-                        snapshot.child("Sensor/distance").value.toString().toFloatOrNull() ?: 0f
-                    val humidity = snapshot.child("Sensor/humidity").value.toString()
+                        snapshot.child("SensorData/WaterLevel").value.toString().toFloatOrNull() ?: 0f
+                    val humidity = snapshot.child("SensorData/Humidity").value.toString()
                     val lightRaw =
-                        snapshot.child("Sensor/light").value.toString().toFloatOrNull() ?: 0f
+                        snapshot.child("SensorData/Light").value.toString().toFloatOrNull() ?: 0f
                     val soilMoistureRaw =
-                        snapshot.child("Sensor/soilMoisture").value.toString().toFloatOrNull() ?: 0f
+                        snapshot.child("SensorData/Moisture").value.toString().toFloatOrNull() ?: 0f
                     val temperature =
-                        snapshot.child("Sensor/temperature").value.toString().toFloatOrNull() ?: 0f
-
+                        snapshot.child("SensorData/Temperature").value.toString().toFloatOrNull()
+                            ?: 0f
                     val lightPercentage = lightRaw.toInt().coerceIn(0, 100)
                     val phProgress = phValue.toInt().coerceIn(0, 14)
                     val soilMoisturePercentage = soilMoistureRaw.toInt().coerceIn(0, 100)
@@ -125,14 +118,11 @@ class DashBoardActivity : AppCompatActivity() {
                     binding.perceantgeOfLight.text = "$lightPercentage%"
                     binding.moisturePercentage.text = "$soilMoisturePercentage%"
                     binding.phValueText.text = "${phValue}ph"
-
                     binding.tankPercentage.text = "$tankLevelRaw%"
                     binding.tankProgressBar.progress = tankLevelRaw.toInt()
-
                     binding.phProgressBar.progress = phProgress
                     binding.progressBar.progress = lightPercentage
                     binding.gaugeView.updateMoistureLevel(soilMoisturePercentage)
-
                     sendSensorDataToServer(
                         phValue,
                         temperature,
@@ -156,8 +146,6 @@ class DashBoardActivity : AppCompatActivity() {
                         )
                     }
                     previousWaterLevel = tankLevelRaw
-
-
                     when (soilMoisturePercentage) {
                         in 0..30 -> {
                             binding.statusText.text = "Wet"
@@ -198,7 +186,6 @@ class DashBoardActivity : AppCompatActivity() {
                     binding.coldLabel.setTextColor(normalColor)
                     binding.optimalLabel.setTextColor(normalColor)
                     binding.hotLabel.setTextColor(normalColor)
-
                     binding.coldTemp.setTextColor(normalColor)
                     binding.optimalTemp.setTextColor(normalColor)
                     binding.hotTemp.setTextColor(normalColor)
@@ -244,9 +231,7 @@ class DashBoardActivity : AppCompatActivity() {
         val jsonBody = JSONObject().apply {
             put("water_usage", waterUsed)
         }.toString()
-
         Log.d("WaterUsage", "Sending data: $jsonBody") // Log data before sending
-
         CoroutineScope(Dispatchers.IO).launch {
             try {
                 val url = URL("http://campus.sicsglobal.co.in/Project/Agritech/api/water_usage.php")
@@ -255,17 +240,14 @@ class DashBoardActivity : AppCompatActivity() {
                 connection.setRequestProperty("Content-Type", "application/json")
                 connection.doOutput = true
                 connection.doInput = true
-
                 // Send JSON data
                 connection.outputStream.use { outputStream ->
                     outputStream.write(jsonBody.toByteArray())
                     outputStream.flush() // Ensure data is written completely
                 }
-
                 // Read server response
                 val responseCode = connection.responseCode
                 val responseMessage = connection.inputStream.bufferedReader().use { it.readText() }
-
                 if (responseCode == HttpURLConnection.HTTP_OK) {
                     Log.d("ServerResponse", "Water usage sent successfully: $responseMessage")
                 } else {
@@ -274,14 +256,12 @@ class DashBoardActivity : AppCompatActivity() {
                         "Failed to send water usage: $responseCode, $responseMessage"
                     )
                 }
-
                 connection.disconnect()
             } catch (e: Exception) {
                 Log.e("HttpError", "Error sending water usage: ${e.message}")
             }
         }
     }
-
 
     private fun sendSensorDataToServer(
         phValue: Float,
@@ -310,14 +290,12 @@ class DashBoardActivity : AppCompatActivity() {
                 connection.outputStream.use { outputStream ->
                     outputStream.write(jsonBody.toByteArray())
                 }
-
                 val responseCode = connection.responseCode
                 if (responseCode == HttpURLConnection.HTTP_OK) {
                     Log.d("ServerResponse", "Sensor data sent successfully")
                 } else {
                     Log.e("ServerResponse", "Failed to send data: $responseCode")
                 }
-
                 connection.disconnect()
             } catch (e: Exception) {
                 Log.e("HttpError", "Error sending data to PHP server: ${e.message}")

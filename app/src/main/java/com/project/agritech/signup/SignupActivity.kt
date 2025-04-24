@@ -8,6 +8,7 @@ import android.provider.MediaStore
 import android.text.InputFilter
 import android.text.method.HideReturnsTransformationMethod
 import android.text.method.PasswordTransformationMethod
+import android.util.Patterns
 import android.view.View
 import android.widget.ImageView
 import android.widget.Toast
@@ -31,7 +32,6 @@ import java.io.File
 
 class SignupActivity : AppCompatActivity(), View.OnClickListener {
     lateinit var binding: ActivitySignupBinding
-
     private lateinit var imgProfile: ImageView
     private var selectedImageUri: Uri? = null
 
@@ -86,7 +86,6 @@ class SignupActivity : AppCompatActivity(), View.OnClickListener {
         val phoneBody = createPartFromString(phone)
         val addressBody = createPartFromString(address)
         val passwordBody = createPartFromString(password)
-
         // Create MultipartBody.Part for the image if available
         var imagePart: MultipartBody.Part? = null
 
@@ -97,14 +96,12 @@ class SignupActivity : AppCompatActivity(), View.OnClickListener {
                 imagePart = MultipartBody.Part.createFormData("image", imageFile.name, requestFile)
             }
         }
-
         // Call API using Retrofit
         lifecycleScope.launch {
             try {
                 val response = ApiUtilities.getInstance().registerUser(
                     nameBody, emailBody, phoneBody, addressBody, passwordBody, imagePart
                 )
-
                 if (response.isSuccessful && response.body() != null) {
                     val signupResponse = response.body()!!
                     if (signupResponse.status == true) { // Ensure response contains success status
@@ -179,7 +176,6 @@ class SignupActivity : AppCompatActivity(), View.OnClickListener {
 
     private fun checkAllFields(): Boolean {
         var isValid = true
-
         // Reset errors
         binding.userName.error = null
         binding.email.error = null
@@ -189,7 +185,6 @@ class SignupActivity : AppCompatActivity(), View.OnClickListener {
         binding.confirmPassword.error = null
 
         val namePattern = "^[A-Za-z]+( [A-Za-z]+)*$"
-
         // Full Name Validation
         val fullName = binding.userName.text.toString().trim()
         if (fullName.isEmpty()) {
@@ -202,17 +197,19 @@ class SignupActivity : AppCompatActivity(), View.OnClickListener {
             binding.userName.error = "Full name must contain at least 3 letters"
             isValid = false
         }
-
-        // Email Validation
-        val email = binding.email.text.toString().trim()
-        if (email.isEmpty()) {
+        // Email
+        if (binding.email.length() == 0) {
             binding.email.error = "Email is required"
             isValid = false
-        } else if (!isEmailValid(email)) {
+        } else if (!isEmailValid(binding.email.text.toString())) {
             binding.email.error = "Invalid email address"
             isValid = false
+        } else if (!binding.email.text.toString()
+                .matches(Regex("^[a-z0-9]+@[a-z0-9]+\\.[a-z]+$"))
+        ) {
+            binding.email.error = "Only lowercase alphanumeric characters allowed"
+            isValid = false
         }
-
         // Phone Number Validation
         val phone = binding.phoneNumber.text.toString().trim()
         val phonePattern = "^[+]?[0-9]{10}$"
@@ -223,14 +220,20 @@ class SignupActivity : AppCompatActivity(), View.OnClickListener {
             binding.phoneNumber.error = "Enter a valid phone number"
             isValid = false
         }
-
-        // Address Validation
+// Address Validation
         val address = binding.address.text.toString().trim()
+        val addressPattern = ".*[a-zA-Z]+.*" // At least one alphabet character
+
         if (address.isEmpty()) {
             binding.address.error = "Address is required"
             isValid = false
+        } else if (address.length < 5) {
+            binding.address.error = "Address must be at least 5 characters"
+            isValid = false
+        } else if (!address.matches(addressPattern.toRegex())) {
+            binding.address.error = "Address must contain alphabet characters"
+            isValid = false
         }
-
         // Password Validation
         val password = binding.password.text.toString()
         val passwordPattern = "^(?=.*[A-Z])(?=.*[0-9])(?=.*[@#\$%^&+=!])(?!.*\\s).{6,8}$"
@@ -245,7 +248,6 @@ class SignupActivity : AppCompatActivity(), View.OnClickListener {
             binding.password.error = "Include 1 uppercase, 1 number, 1 special character"
             isValid = false
         }
-
         // Confirm Password Validation
         val confirmPassword = binding.confirmPassword.text.toString()
         if (confirmPassword.isEmpty()) {
@@ -255,7 +257,6 @@ class SignupActivity : AppCompatActivity(), View.OnClickListener {
             binding.confirmPassword.error = "Passwords do not match"
             isValid = false
         }
-
         // **Check profile image only if other fields are valid**
         if (isValid) {
             val defaultDrawable = ContextCompat.getDrawable(this, R.drawable.ic_profile)
@@ -266,17 +267,12 @@ class SignupActivity : AppCompatActivity(), View.OnClickListener {
                 isValid = false
             }
         }
-
         return isValid
     }
-
     // Helper function to validate email
-    private fun isEmailValid(email: String): Boolean {
-        if (!android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
-            return false
-        }
-        val domainPart = email.substringAfterLast(".", "")
-        return domainPart.length >= 2 // Ensure TLD is at least 2 characters long
+
+    fun isEmailValid(email: CharSequence?): Boolean {
+        return email != null && Patterns.EMAIL_ADDRESS.matcher(email).matches()
     }
 
     private fun showHidePassWord(v: View?) {
@@ -309,7 +305,6 @@ class SignupActivity : AppCompatActivity(), View.OnClickListener {
                     PasswordTransformationMethod.getInstance()
             }
         }
-
     }
 
     override fun onClick(v: View?) {

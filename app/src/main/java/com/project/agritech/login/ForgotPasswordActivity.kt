@@ -27,8 +27,6 @@ class ForgotPasswordActivity : AppCompatActivity() {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
         }
-
-
         binding.loginNow.setOnClickListener {
             val intent = Intent(this@ForgotPasswordActivity, LoginActivity::class.java)
             startActivity(intent)
@@ -37,7 +35,6 @@ class ForgotPasswordActivity : AppCompatActivity() {
 
         binding.btnNext.setOnClickListener {
             val email = binding.emailEditText.text.toString().trim()
-
             // Validate email
             if (!isValidEmail(email)) {
                 Toast.makeText(this, "Please enter a valid email address", Toast.LENGTH_SHORT)
@@ -87,7 +84,6 @@ class ForgotPasswordActivity : AppCompatActivity() {
             }
         }
     }
-
 
     private fun isValidEmail(email: String): Boolean {
         return android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()

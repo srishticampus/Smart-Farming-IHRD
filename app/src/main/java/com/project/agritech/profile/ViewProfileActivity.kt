@@ -6,7 +6,6 @@ import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
 import android.view.Gravity
 import android.view.ViewGroup
-import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
@@ -54,7 +53,6 @@ class ViewProfileActivity : AppCompatActivity() {
         binding.editProfile.setOnClickListener {
             val intent = Intent(applicationContext, EditProfileActivity::class.java)
             startActivity(intent)
-
         }
 
         binding.btnWaterUsageContainer.setOnClickListener {
@@ -68,12 +66,9 @@ class ViewProfileActivity : AppCompatActivity() {
             startActivity(intent)
             finish() // Ensure this activity is finished so it doesn't stack
         }
-
-
         binding.btnResetPassContainer.setOnClickListener {
             val intent = Intent(applicationContext, ResetPasswordActivity::class.java)
             startActivity(intent)
-//            finish()
         }
         name = binding.nameTv
         email = binding.emailTv
@@ -86,13 +81,11 @@ class ViewProfileActivity : AppCompatActivity() {
         binding.btnLogoutContainer.setOnClickListener {
             // Inflate the custom layout for the dialog
             val dialogView = layoutInflater.inflate(R.layout.logout_dialog, null)
-
             // Create AlertDialog with custom style
             val alertDialog = AlertDialog.Builder(this, R.style.TransparentDialog)
                 .setView(dialogView)
                 .setCancelable(false)
                 .create()
-
             // Set background transparency and position it properly
             alertDialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
             alertDialog.window?.setLayout(
@@ -100,9 +93,7 @@ class ViewProfileActivity : AppCompatActivity() {
                 ViewGroup.LayoutParams.WRAP_CONTENT
             )
             alertDialog.window?.setGravity(Gravity.CENTER)
-
             alertDialog.show()
-
             // Handling button clicks inside the custom dialog
             val btnYes = dialogView.findViewById<AppCompatButton>(R.id.btnYes)
             val btnNo = dialogView.findViewById<AppCompatButton>(R.id.btnNo)
@@ -113,15 +104,12 @@ class ViewProfileActivity : AppCompatActivity() {
                 val intent = Intent(applicationContext, LoginActivity::class.java)
                 intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
                 startActivity(intent)
-                // finish()
-
                 alertDialog.dismiss()
             }
 
             btnNo.setOnClickListener {
                 alertDialog.dismiss()
             }
-
         }
     }
 
@@ -145,7 +133,6 @@ class ViewProfileActivity : AppCompatActivity() {
                         binding.emailTv.text = profileData[0].email
                         binding.phoneTv.text = profileData[0].phone
                         binding.addressTv.text = profileData[0].address
-
 // Load the profile image using Glide
                         Glide.with(this@ViewProfileActivity)
                             .load(profileData[0].photo)

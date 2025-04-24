@@ -9,7 +9,7 @@ import com.project.agritech.databinding.ActivityOnboardingBinding
 import me.relex.circleindicator.CircleIndicator3
 
 class OnboardingActivity : AppCompatActivity() {
-lateinit var binding:ActivityOnboardingBinding
+    lateinit var binding: ActivityOnboardingBinding
     private lateinit var imageViewPager: ViewPager2
     private lateinit var textViewPager: ViewPager2
     private lateinit var indicator: CircleIndicator3
@@ -55,13 +55,11 @@ lateinit var binding:ActivityOnboardingBinding
                 textViewPager.currentItem = position
             }
         })
-
         textViewPager.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
             override fun onPageSelected(position: Int) {
                 imageViewPager.currentItem = position
             }
         })
-
         // Attach CircleIndicator3 with textViewPager
         indicator.setViewPager(textViewPager)
 
@@ -70,6 +68,5 @@ lateinit var binding:ActivityOnboardingBinding
             bottomSheet.show(supportFragmentManager, "LoginBottomSheet")
             //Toast.makeText(applicationContext, "Clicked", Toast.LENGTH_SHORT).show()
         }
-
     }
 }

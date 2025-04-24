@@ -1,14 +1,14 @@
 {
   "project_info": {
-    "project_number": "672199162573",
-    "firebase_url": "https://smart-farming-ihrd-default-rtdb.asia-southeast1.firebasedatabase.app",
-    "project_id": "smart-farming-ihrd",
-    "storage_bucket": "smart-farming-ihrd.firebasestorage.app"
+    "project_number": "220919383508",
+    "firebase_url": "https://smartfarming-1bf65-default-rtdb.asia-southeast1.firebasedatabase.app",
+    "project_id": "smartfarming-1bf65",
+    "storage_bucket": "smartfarming-1bf65.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:672199162573:android:25297866229a1ecfdc4784",
+        "mobilesdk_app_id": "1:220919383508:android:e82e1b39a180f6940e0241",
         "android_client_info": {
           "package_name": "com.project.agritech"
         }
@@ -16,7 +16,7 @@
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyAPZbAi30BRCWdc_e5E7Ogso5Tj7OCT24Y"
+          "current_key": "AIzaSyCP0_p1scez4JPDqLspb2CIbVkiMp5tCgk"
         }
       ],
       "services": {

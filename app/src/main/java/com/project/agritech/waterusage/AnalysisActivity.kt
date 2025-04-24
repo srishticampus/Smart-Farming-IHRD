@@ -31,13 +31,14 @@ class AnalysisActivity : AppCompatActivity() {
     lateinit var binding: ActivityAnalysisBinding
     private var dateList = mutableListOf<String>()
     private lateinit var barChart: BarChart
-
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         binding = ActivityAnalysisBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
+        barChart = binding.waterUsageChart
+
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
@@ -63,8 +64,6 @@ class AnalysisActivity : AppCompatActivity() {
 
             override fun onNothingSelected(parent: AdapterView<*>?) {}
         }
-
-
     }
 
     private fun fetchWaterUsageDates() {

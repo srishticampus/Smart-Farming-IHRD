@@ -6,6 +6,7 @@ import android.net.Uri
 import android.os.Bundle
 import android.provider.MediaStore
 import android.util.Log
+import android.util.Patterns
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.bumptech.glide.Glide
@@ -46,7 +47,6 @@ class EditProfileActivity : AppCompatActivity() {
         binding.backButton.setOnClickListener { finish() }
         binding.profileImage.setOnClickListener { openGalleryForImageSelection() }
         binding.updateButton.setOnClickListener { updateProfile(userId, imageUri) }
-        // binding.updateButton.setOnClickListener { updateProfile(userId) }
     }
 
     private fun viewProfile(userId: String) {
@@ -64,7 +64,7 @@ class EditProfileActivity : AppCompatActivity() {
                             binding.phoneField.setText(userData.phone)
                             binding.addressField.setText(userData.address)
 
-                            if (!userData.photo.isNullOrEmpty()) {
+                            if (userData.photo.isNotEmpty()) {
                                 Glide.with(this@EditProfileActivity)
                                     .load(userData.photo)
                                     .placeholder(R.drawable.profile_icon)
@@ -124,9 +124,9 @@ class EditProfileActivity : AppCompatActivity() {
         // **Fix Logging Issue**: Show actual RequestBody values
         Log.d(
             "UpdateProfile", "Sending Updated Data: ID: $userId, " +
-                    "Name: ${nameRequest?.stringValue()}, " +
-                    "Email: ${emailRequest?.stringValue()}, " +
-                    "Phone: ${phoneRequest?.stringValue()}, " +
+                    "Name: ${nameRequest.stringValue()}, " +
+                    "Email: ${emailRequest.stringValue()}, " +
+                    "Phone: ${phoneRequest.stringValue()}, " +
                     "Address: ${addressRequest?.stringValue()}"
         )
 
@@ -142,19 +142,16 @@ class EditProfileActivity : AppCompatActivity() {
                     address = addressRequest,
                     image = imagePart
                 )
-
                 withContext(Dispatchers.Main) {
                     Log.d("UpdateProfile", "Raw Response: ${response.raw()}")
                     Log.d(
                         "UpdateProfile",
                         "Response Body: ${response.body()?.toString() ?: "Null"}"
                     )
-
                     if (response.isSuccessful) {
                         val result = response.body()
                         if (result != null && result.status) {
                             showToast("Profile updated successfully")
-
                             // Update only changed fields in SharedPreferences
                             if (nameRequest != null) sharedPreferencesManager.saveUsername(
                                 currentName
@@ -190,7 +187,6 @@ class EditProfileActivity : AppCompatActivity() {
         originalEmail = email
         originalPhone = phone
         originalAddress = address
-
         binding.usernameField.setText(name)
         binding.emailField.setText(email)
         binding.phoneField.setText(phone)
@@ -238,13 +234,11 @@ class EditProfileActivity : AppCompatActivity() {
 
     private fun validateFields(): Boolean {
         var isValid = true
-
         // Reset errors
         binding.usernameField.error = null
         binding.emailField.error = null
         binding.phoneField.error = null
         binding.addressField.error = null
-
         // Name Validation
         val name = binding.usernameField.text.toString().trim()
         val namePattern = "^[A-Za-z ]+$"
@@ -259,39 +253,49 @@ class EditProfileActivity : AppCompatActivity() {
                 "Invalid name. Only alphabetic characters and spaces are allowed"
             isValid = false
         }
-
         // Phone Validation
-        val phone = binding.phoneField.text.toString().trim()
+        val phone = binding.phoneField.text.toString()
+        val trimmedPhone = phone.trim()
         val phonePattern = "^[0-9]{10}$"
-        if (phone.isEmpty()) {
+        if (trimmedPhone.isEmpty()) {
             binding.phoneField.error = "Phone number is required"
             isValid = false
-        } else if (!phone.matches(phonePattern.toRegex())) {
+        } else if (phone != trimmedPhone) {
+            binding.phoneField.error = "Phone number cannot contain leading/trailing spaces"
+            isValid = false
+        } else if (trimmedPhone == "0000000000") {
+            binding.phoneField.error = "Phone number cannot be all zeroes"
+            isValid = false
+        } else if (!trimmedPhone.matches(phonePattern.toRegex())) {
             binding.phoneField.error = "Enter a valid 10-digit phone number"
             isValid = false
         }
 
-        // Email Validation
         val email = binding.emailField.text.toString().trim()
         if (email.isEmpty()) {
             binding.emailField.error = "Email is required"
             isValid = false
-        } else if (!android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
+        } else if (!Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
             binding.emailField.error = "Invalid email address"
             isValid = false
+        } else if (!email.endsWith("@gmail.com")) {
+            binding.emailField.error = "Only Gmail addresses are allowed"
+            isValid = false
         }
-
         // Address Validation
         val address = binding.addressField.text.toString().trim()
+        val addressPattern = ".*[A-Za-z].*" // Should contain at least one alphabet
         if (address.isEmpty()) {
             binding.addressField.error = "Address is required"
             isValid = false
         } else if (address.length < 5) {
             binding.addressField.error = "Address must be at least 5 characters long"
             isValid = false
+        } else if (!address.matches(addressPattern.toRegex())) {
+            binding.addressField.error = "Address must contain letters"
+            isValid = false
         }
-
-        // Profile Image Validation (Only if a new image is selected)
+        // Image validation (optional)
         if (imageUri != null) {
             val file = getFileFromUri(imageUri!!)
             if (file == null || !file.exists() || file.length() == 0L) {
@@ -299,11 +303,6 @@ class EditProfileActivity : AppCompatActivity() {
                 isValid = false
             }
         }
-
-        if (!isValid) {
-            showToast("Please correct the errors above")
-        }
-
         return isValid
     }
 }
